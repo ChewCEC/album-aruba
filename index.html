@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bajo el agua en Aruba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=Barlow+Semi+Condensed:wght@500;600&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --agua: #D7F0EC;
+    --agua-hondo: #A6DAD3;
+    --mar: #0D4B66;
+    --tinta: #1D3B4B;
+    --tinta-suave: #4A6573;
+    --azul: #2D6FB7;
+    --amarillo: #F9D616;
+    --rojo: #E4002B;
+    --papel: #FFFFFF;
+    --oro: #E3B62E;
+    --serif: "Young Serif", Georgia, "Times New Roman", serif;
+    --sans: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --cond: "Barlow Semi Condensed", "Arial Narrow", "Barlow", system-ui, sans-serif;
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--agua);
+    color: var(--tinta);
+    font-family: var(--sans);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* Encabezado con la composición de la bandera de Aruba */
+  .bandera {
+    position: relative;
+    background: var(--azul);
+    color: var(--papel);
+    padding: 2.25rem 1.25rem 5rem;
+    overflow: hidden;
+  }
+  .bandera::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1.5rem;
+    height: 1.5rem;
+    background: linear-gradient(var(--amarillo) 0 33.3%, transparent 33.3% 66.6%, var(--amarillo) 66.6% 100%);
+  }
+  .bandera-contenido {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+  .bandera-estrella {
+    width: 52px;
+    height: 52px;
+    display: block;
+    margin-bottom: 1.25rem;
+  }
+  .titulo {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.3rem, 6.5vw, 4.2rem);
+    line-height: 1.02;
+    margin: 0 0 .9rem;
+    max-width: 14ch;
+  }
+  .bajada {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    max-width: 46ch;
+    margin: 0 0 1.75rem;
+  }
+  .progreso {
+    max-width: 22rem;
+  }
+  .progreso-texto {
+    font-family: var(--cond);
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin: 0 0 .4rem;
+  }
+  .progreso-barra {
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .28);
+    overflow: hidden;
+  }
+  .progreso-relleno {
+    height: 100%;
+    width: 0;
+    background: var(--amarillo);
+    border-radius: inherit;
+    transition: width .5s ease;
+  }
+
+  /* Contenido */
+  main {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 3rem;
+  }
+  .seccion + .seccion {
+    margin-top: 3.5rem;
+  }
+  .seccion-titulo {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.9rem;
+    line-height: 1.15;
+    color: var(--mar);
+    margin: 0 0 .3rem;
+  }
+  .seccion-descripcion {
+    color: var(--tinta-suave);
+    margin: 0 0 1.5rem;
+    max-width: 60ch;
+  }
+  .rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 272px), 1fr));
+    gap: 1.75rem;
+  }
+
+  /* Lámina (carta que se voltea) */
+  .lamina {
+    perspective: 1400px;
+  }
+  .lamina-giro {
+    display: grid;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .7s cubic-bezier(.3, .7, .2, 1);
+  }
+  .lamina.volteada .lamina-giro {
+    transform: rotateY(180deg);
+  }
+  .cara {
+    grid-area: 1 / 1;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    background: var(--papel);
+    border: 8px solid var(--papel);
+    border-radius: 16px;
+    box-shadow: 0 1px 0 rgba(13, 75, 102, .08), 0 12px 26px -16px rgba(13, 75, 102, .55);
+  }
+  .lamina[data-rareza="rara"] .cara {
+    border-color: var(--oro);
+  }
+
+  /* Frente */
+  .frente {
+    position: relative;
+    display: flex;
+    min-height: 360px;
+  }
+  .frente-voltear {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 9px;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .foto {
+    position: relative;
+    flex: 1;
+    min-height: 260px;
+    border-radius: 9px;
+    overflow: hidden;
+    background: var(--agua-hondo);
+  }
+  .foto-fondo {
+    position: absolute;
+    inset: -24px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(18px) brightness(.85);
+    transition: filter .45s ease;
+  }
+  .foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity .4s ease, filter .45s ease;
+  }
+  .lamina.foto-lista .foto img {
+    opacity: 1;
+  }
+  .foto-estado {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 1rem;
+    font-size: .9rem;
+    color: var(--mar);
+  }
+  .lamina.foto-lista .foto-estado {
+    display: none;
+  }
+  /* Lámina sin marcar: foto en tono azul, como un espacio por llenar */
+  .foto::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--azul);
+    mix-blend-mode: color;
+    opacity: .5;
+    transition: opacity .45s ease;
+    pointer-events: none;
+  }
+  .lamina:not(.vista) .foto img {
+    filter: grayscale(.85) contrast(.95);
+  }
+  .lamina:not(.vista) .foto-fondo {
+    filter: blur(18px) brightness(.85) grayscale(.85);
+  }
+  .lamina.vista .foto::after {
+    opacity: 0;
+  }
+  /* Estrella para marcar la lámina sin voltearla */
+  .marcar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .92);
+    box-shadow: 0 2px 8px rgba(13, 75, 102, .35);
+    cursor: pointer;
+    transition: background-color .25s ease, box-shadow .25s ease;
+  }
+  .marcar:hover {
+    background: var(--papel);
+  }
+  .marcar svg {
+    width: 48px;
+    height: 48px;
+    transform: scale(.56);
+    transition: transform .4s cubic-bezier(.2, 1.6, .4, 1);
+  }
+  .marcar svg path {
+    fill: transparent;
+    stroke: var(--rojo);
+    stroke-width: 10;
+    stroke-linejoin: round;
+    transition: fill .2s ease;
+  }
+  .marcar[aria-pressed="true"] {
+    background: transparent;
+    box-shadow: none;
+  }
+  .marcar[aria-pressed="true"] svg {
+    transform: scale(1);
+    filter: drop-shadow(0 2px 3px rgba(13, 75, 102, .4));
+  }
+  .marcar[aria-pressed="true"] svg path {
+    fill: var(--rojo);
+    stroke: var(--papel);
+    stroke-width: 6;
+  }
+  .banda {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: .7rem .3rem .15rem;
+    font-family: var(--cond);
+  }
+  .numero {
+    font-family: var(--cond);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--mar);
+  }
+  .rareza {
+    font-family: var(--cond);
+    font-weight: 500;
+    font-size: .98rem;
+    color: var(--tinta-suave);
+  }
+  .lamina[data-rareza="rara"] .rareza {
+    color: #8A6300;
+  }
+
+  /* Reverso */
+  .reverso {
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    gap: .65rem;
+    padding: .55rem .5rem .35rem;
+    cursor: pointer;
+  }
+  .reverso-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+  .nombre {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.5rem;
+    line-height: 1.12;
+    color: var(--mar);
+    margin: .1rem 0 0;
+  }
+  .cientifico {
+    font-style: italic;
+    color: var(--tinta-suave);
+    margin: -.4rem 0 0;
+  }
+  .otros-nombres,
+  .ficha {
+    margin: 0;
+    display: grid;
+    gap: .35rem;
+  }
+  .otros-nombres div,
+  .ficha div {
+    display: grid;
+    grid-template-columns: 6.6rem 1fr;
+    gap: .5rem;
+  }
+  dt {
+    font-family: var(--cond);
+    font-weight: 500;
+    font-size: .92rem;
+    color: var(--tinta-suave);
+    padding-top: .05rem;
+  }
+  dd {
+    margin: 0;
+    font-size: .95rem;
+    line-height: 1.4;
+  }
+  .texto {
+    margin: 0;
+    font-size: .95rem;
+    line-height: 1.48;
+  }
+  .texto strong {
+    font-weight: 600;
+    color: var(--mar);
+  }
+  .otros-nombres {
+    padding-bottom: .55rem;
+    border-bottom: 1px solid var(--agua-hondo);
+  }
+  .ficha {
+    padding-top: .55rem;
+    border-top: 1px solid var(--agua-hondo);
+  }
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem 1rem;
+    margin-top: auto;
+    padding-top: .4rem;
+  }
+  .boton-vista {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    font-family: var(--cond);
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--rojo);
+    background: var(--papel);
+    border: 2px solid var(--rojo);
+    border-radius: 999px;
+    padding: .38rem 1rem .38rem .7rem;
+    cursor: pointer;
+    transition: background-color .2s ease, color .2s ease;
+  }
+  .boton-vista svg {
+    width: 18px;
+    height: 18px;
+  }
+  .boton-vista svg path {
+    fill: transparent;
+    stroke: currentColor;
+    stroke-width: 8;
+    stroke-linejoin: round;
+  }
+  .boton-vista[aria-pressed="true"] {
+    background: var(--rojo);
+    color: var(--papel);
+  }
+  .boton-vista[aria-pressed="true"] svg path {
+    fill: currentColor;
+  }
+  .boton-voltear {
+    font: inherit;
+    font-size: .95rem;
+    color: var(--mar);
+    background: none;
+    border: 0;
+    padding: .3rem 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .credito {
+    margin: 0;
+    font-size: .78rem;
+    line-height: 1.4;
+    color: var(--tinta-suave);
+  }
+  .credito a {
+    color: inherit;
+  }
+
+  /* Foco visible */
+  .frente-voltear:focus-visible,
+  .marcar:focus-visible,
+  .reverso:focus-visible,
+  .boton-vista:focus-visible,
+  .boton-voltear:focus-visible,
+  .credito a:focus-visible {
+    outline: 3px solid var(--azul);
+    outline-offset: 4px;
+  }
+  .reverso:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  footer {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 1.25rem 3rem;
+    color: var(--tinta-suave);
+    font-size: .9rem;
+  }
+  footer p {
+    max-width: 70ch;
+    margin: 0;
+  }
+
+  @media (max-width: 520px) {
+    .bandera { padding-bottom: 4.5rem; }
+    .bajada { font-size: 1.02rem; }
+    main { padding-top: 2rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lamina-giro,
+    .marcar,
+    .marcar svg,
+    .foto img,
+    .foto-fondo,
+    .foto::after,
+    .progreso-relleno {
+      transition: none;
+    }
+  }
+
+  /* Grupos dentro de cada sección */
+  .grupo + .grupo {
+    margin-top: 2.5rem;
+  }
+  .grupo-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: .75rem;
+    row-gap: .1rem;
+    margin: 0 0 1rem;
+    padding-bottom: .4rem;
+    border-bottom: 2px solid var(--agua-hondo);
+  }
+  .grupo-titulo {
+    font-family: var(--cond);
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--mar);
+    margin: 0;
+  }
+  .grupo-cuenta {
+    white-space: nowrap;
+    font-family: var(--cond);
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--tinta-suave);
+  }
+</style>
+</head>
+<body>
+
+<header class="bandera">
+  <div class="bandera-contenido">
+    <svg class="bandera-estrella" viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M50 3 L61 39 L97 50 L61 61 L50 97 L39 61 L3 50 L39 39 Z" fill="#E4002B" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round"/>
+    </svg>
+    <h1 class="titulo">Bajo el agua en Aruba</h1>
+    <p class="bajada">Las especies que vi haciendo snorkel y algunas que me faltan. Toca una lámina para ver qué especie es y marca con la estrella las que viste.</p>
+    <div class="progreso">
+      <p class="progreso-texto" id="progreso-texto" aria-live="polite">Vistas: 0 de 0</p>
+      <div class="progreso-barra" aria-hidden="true"><div class="progreso-relleno" id="progreso-relleno"></div></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="seccion" aria-labelledby="titulo-ruta">
+    <h2 class="seccion-titulo" id="titulo-ruta">Mi ruta de snorkel</h2>
+    <p class="seccion-descripcion">Aguas poco profundas en Boca Catalina, Tres Trapi y alrededores.</p>
+    <div data-zona="ruta"></div>
+  </section>
+
+  <section class="seccion" aria-labelledby="titulo-proxima">
+    <h2 class="seccion-titulo" id="titulo-proxima">Para la próxima</h2>
+    <p class="seccion-descripcion">Especies de aguas más profundas o de otras playas de Aruba, fuera de mi ruta.</p>
+    <div data-zona="proxima"></div>
+  </section>
+</main>
+
+<footer>
+  <p>Fotos de Wikimedia Commons. El autor y la licencia de cada foto están en el reverso de su lámina. Las láminas que marcas como vistas se guardan en este navegador.</p>
+</footer>
+
+<script>
+/* ------------------------------------------------------------------
+   Datos de las especies.
+   - zona: "ruta" (aguas poco profundas de mi ruta) o "proxima".
+   - grupo: "pez", "tiburon-raya", "tortuga" o "invertebrado".
+   - rareza: "comun", "poco" o "rara".
+   - articulo: título en Wikipedia (se usa la foto principal del artículo).
+   - archivo (opcional): nombre exacto de un archivo de Wikimedia Commons
+     para fijar otra foto, por ejemplo "Sergeant major fish.jpg".
+   La numeración de las láminas se calcula sola según el orden de la página.
+------------------------------------------------------------------- */
+const ESPECIES = [
+  /* ---------- Mi ruta: peces comunes ---------- */
+  {
+    id: "sargento-mayor", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Sargento mayor", cientifico: "Abudefduf saxatilis", ingles: "Sergeant major", papiamento: "Cataboli / Waira",
+    articulo: "Abudefduf saxatilis",
+    reconocer: "Plateado, con el lomo amarillento y cinco franjas negras verticales, como los galones de un uniforme militar.",
+    dato: "Los machos cuidan los huevos pegados a las rocas y se ponen de un azul oscuro mientras los vigilan.",
+    donde: "En grupos grandes en Boca Catalina y alrededor del Antilla. Se acercan mucho a quien hace snorkel.",
+    tamano: "Hasta 23 cm"
+  },
+  {
+    id: "cirujano-azul", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Cirujano azul", cientifico: "Acanthurus coeruleus", ingles: "Blue tang", papiamento: "Kleinfeshi blauw",
+    articulo: "Acanthurus coeruleus",
+    reconocer: "Ovalado y aplanado, de un azul intenso, con una espina blanca o amarilla a cada lado de la base de la cola.",
+    dato: "Los juveniles son amarillo brillante y van pasando por tonos intermedios hasta volverse azules. La espina de la cola corta como un bisturí, de ahí lo de «cirujano».",
+    donde: "En grupos que pastan algas sobre el arrecife de Boca Catalina, a veces mezclados con peces doctor.",
+    tamano: "Hasta 39 cm"
+  },
+  {
+    id: "pez-doctor", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Pez doctor", cientifico: "Acanthurus chirurgus", ingles: "Doctorfish", papiamento: "Kleinfeshi blanco",
+    articulo: "Acanthurus chirurgus",
+    reconocer: "Gris azulado o marrón, con unas diez barras verticales tenues en el cuerpo. Se parece al cirujano azul, pero en tonos más apagados.",
+    dato: "Como su pariente el cirujano azul, tiene una espina filosa a cada lado de la cola que usa para defenderse.",
+    donde: "En grupos sobre fondos de roca con algas en Boca Catalina y alrededores.",
+    tamano: "Hasta 39 cm"
+  },
+  {
+    id: "pez-loro-semaforo", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Pez loro semáforo", cientifico: "Sparisoma viride", ingles: "Stoplight parrotfish", papiamento: "Gutu barica cora",
+    articulo: "Sparisoma viride",
+    reconocer: "El macho es verde esmeralda, con una mancha amarilla junto a la agalla y otra en la base de la cola. La hembra es gris y marrón, con la panza y las aletas rojas.",
+    dato: "Raspa el coral con su «pico» para comer algas y expulsa lo que no digiere como arena fina. Buena parte de la arena blanca del Caribe pasó por un pez loro.",
+    donde: "En los arrecifes poco profundos de Boca Catalina. Si te quedas quieto, se oye cuando muerde el coral.",
+    tamano: "Hasta 60 cm"
+  },
+  {
+    id: "pez-loro-princesa", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Pez loro princesa", cientifico: "Scarus taeniopterus", ingles: "Princess parrotfish", papiamento: "Gutu rabo di gai",
+    articulo: "Scarus taeniopterus",
+    reconocer: "El macho es verde azulado, con dos franjas naranja en la cabeza y una mancha amarilla en el costado. La hembra tiene tres franjas oscuras a lo largo del cuerpo.",
+    dato: "De noche, muchos peces loro se envuelven en una burbuja de moco que fabrican ellos mismos, como un saco de dormir.",
+    donde: "En grupos sobre el arrecife poco profundo de Boca Catalina.",
+    tamano: "Hasta 35 cm"
+  },
+  {
+    id: "pez-loro-azul", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Pez loro azul", cientifico: "Scarus coeruleus", ingles: "Blue parrotfish", papiamento: "Gutu blauw / Boca di sapatu",
+    articulo: "Scarus coeruleus",
+    reconocer: "Azul de pies a cabeza. Los machos grandes desarrollan una joroba en la frente que les da un perfil cuadrado.",
+    dato: "Sus dientes están fusionados en un pico que nunca deja de crecer; lo mantiene a raya raspando coral y roca.",
+    donde: "En los arrecifes de Boca Catalina y la costa noroeste, a menudo en grupos.",
+    tamano: "Normalmente 30 a 75 cm"
+  },
+  {
+    id: "doncella-cabeza-azul", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Doncella cabeza azul", cientifico: "Thalassoma bifasciatum", ingles: "Bluehead wrasse", papiamento: "Peuchi",
+    articulo: "Thalassoma bifasciatum",
+    reconocer: "El macho tiene la cabeza azul, dos barras negras separadas por una blanca y el resto del cuerpo verde. Hembras y juveniles son amarillos, a veces con una franja negra.",
+    dato: "Casi todos nacen hembras. Si el macho del grupo desaparece, la hembra más grande cambia de sexo en pocos días.",
+    donde: "Por todas partes en el arrecife de Boca Catalina, nadando en grupos inquietos.",
+    tamano: "Hasta 25 cm"
+  },
+  {
+    id: "doncella-cabeza-amarilla", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Doncella cabeza amarilla", cientifico: "Halichoeres garnoti", ingles: "Yellowhead wrasse", papiamento: "Peuchi cabez",
+    articulo: "Halichoeres garnoti",
+    reconocer: "El macho tiene la cabeza y el frente amarillos, una barra oscura en el medio y la parte de atrás azul verdosa. Los juveniles son amarillos con una franja azul eléctrico.",
+    dato: "Nada sin parar cerca del fondo, revisando cada rincón en busca de pequeños crustáceos y gusanos.",
+    donde: "Sobre la roca y el coral de Boca Catalina, casi siempre cerca del fondo.",
+    tamano: "Hasta 19 cm"
+  },
+  {
+    id: "ronco-frances", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Ronco francés", cientifico: "Haemulon flavolineatum", ingles: "French grunt", papiamento: "Robekki",
+    articulo: "Haemulon flavolineatum",
+    reconocer: "Amarillo, con franjas azul plateado que corren en diagonal por la parte baja del cuerpo.",
+    dato: "Los roncos se llaman así por el ruido que hacen al rechinar unos dientes que tienen en la garganta. De día descansan en grupos y de noche salen a comer.",
+    donde: "En grupos quietos junto a rocas y corales de Boca Catalina y alrededor del Antilla.",
+    tamano: "Hasta 30 cm"
+  },
+  {
+    id: "ronco-boca-chica", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Ronco boca chica", cientifico: "Haemulon chrysargyreum", ingles: "Smallmouth grunt", papiamento: "Robekki",
+    articulo: "Haemulon chrysargyreum",
+    reconocer: "Plateado azulado, con seis franjas amarillas a lo largo del cuerpo y aletas amarillas. La boca es pequeña comparada con la de otros roncos.",
+    dato: "Forma cardúmenes grandes que se quedan casi inmóviles a media agua, frente a las rocas.",
+    donde: "Frente a las rocas de Boca Catalina y Tres Trapi, en grupos numerosos.",
+    tamano: "Hasta 23 cm"
+  },
+  {
+    id: "pargo-cola-amarilla", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Pargo cola amarilla", cientifico: "Ocyurus chrysurus", ingles: "Yellowtail snapper", papiamento: "Gilistelch'i piedra",
+    articulo: "Ocyurus chrysurus",
+    reconocer: "Azul plateado, con una franja amarilla que va del hocico a la cola. La cola es amarilla y muy ahorquillada.",
+    dato: "A diferencia de otros pargos, nada a media agua y no cerca del fondo. Suele ser de los primeros en acercarse cuando un barco se detiene.",
+    donde: "En grupos sobre el arrecife de Boca Catalina y alrededor de los barcos de snorkel.",
+    tamano: "Normalmente unos 40 cm"
+  },
+  {
+    id: "pez-trompeta", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Pez trompeta", cientifico: "Aulostomus maculatus", ingles: "Trumpetfish", papiamento: "Trompet",
+    articulo: "Aulostomus maculatus",
+    reconocer: "Largo y delgado como un palo, con la boca en forma de tubo. Puede ser marrón, gris, amarillo o azulado.",
+    dato: "Caza escondido en vertical entre los abanicos de mar, o nadando pegado a un pez más grande para acercarse a sus presas sin que lo vean.",
+    donde: "Entre gorgonias y corales de Boca Catalina y alrededor del Antilla.",
+    tamano: "Hasta 1 m"
+  },
+  {
+    id: "pez-aguja", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Pez aguja de aleta roja", cientifico: "Strongylura notata", ingles: "Redfin needlefish", papiamento: null,
+    articulo: "Strongylura notata",
+    reconocer: "Muy delgado y plateado, con el lomo verdoso o azulado y las dos mandíbulas alargadas como una aguja. Las aletas tienen tonos rojizos.",
+    dato: "Sus huesos son verdes, por un pigmento llamado biliverdina.",
+    donde: "Justo debajo de la superficie, en grupos pequeños, en Boca Catalina, Tres Trapi y las playas de la costa.",
+    tamano: "Normalmente unos 30 cm"
+  },
+  {
+    id: "cromis-azul", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Cromis azul", cientifico: "Chromis cyanea", ingles: "Blue chromis", papiamento: "Stelchi blauw",
+    articulo: "Chromis cyanea",
+    reconocer: "Pequeño y azul brillante, con el lomo más oscuro y la cola muy ahorquillada con bordes negros.",
+    dato: "Forma nubes de peces sobre el arrecife para comer plancton, y baja a esconderse en el coral en cuanto algo lo asusta.",
+    donde: "Sobre los corales de Boca Catalina, un poco por encima del arrecife.",
+    tamano: "Hasta 15 cm"
+  },
+  {
+    id: "pez-mariposa-cuatro-ojos", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Pez mariposa de cuatro ojos", cientifico: "Chaetodon capistratus", ingles: "Foureye butterflyfish", papiamento: "Macamba marinier",
+    articulo: "Chaetodon capistratus",
+    reconocer: "Blanco plateado con líneas finas en diagonal, una banda negra que le tapa el ojo y una mancha negra con borde blanco cerca de la cola.",
+    dato: "La mancha cerca de la cola parece un ojo y confunde a los depredadores sobre hacia dónde va a escapar.",
+    donde: "En parejas sobre el arrecife de Boca Catalina.",
+    tamano: "Hasta 15 cm"
+  },
+  {
+    id: "pez-angel-frances", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Pez ángel francés", cientifico: "Pomacanthus paru", ingles: "French angelfish", papiamento: "Sheu",
+    articulo: "Pomacanthus paru",
+    reconocer: "Cuerpo alto y aplanado, negro, con el borde de cada escama amarillo y un aro amarillo alrededor del ojo.",
+    dato: "Suele nadar en pareja. De joven es negro con franjas amarillas y trabaja de limpiador: les quita parásitos a otros peces.",
+    donde: "Boca Catalina, Tres Trapi y el naufragio Antilla. Es curioso y se deja ver de cerca.",
+    tamano: "Hasta 40 cm"
+  },
+  {
+    id: "pez-ardilla", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Pez ardilla", cientifico: "Holocentrus adscensionis", ingles: "Squirrelfish", papiamento: "Candelchi",
+    articulo: "Holocentrus adscensionis",
+    reconocer: "Rojo con franjas plateadas, ojos muy grandes y una aleta dorsal espinosa con las puntas amarillas.",
+    dato: "Sus ojos grandes delatan que es nocturno: de día se esconde en grietas y sale a cazar cuando oscurece.",
+    donde: "En grietas y bajo salientes de roca en Boca Catalina y en el Antilla.",
+    tamano: "Hasta 35 cm"
+  },
+  {
+    id: "salmonete-amarillo", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Salmonete amarillo", cientifico: "Mulloidichthys martinicus", ingles: "Yellow goatfish", papiamento: "Barbishi",
+    articulo: "Mulloidichthys martinicus",
+    reconocer: "Plateado, con una franja amarilla a lo largo del cuerpo y la cola amarilla. Tiene dos barbillas debajo de la boca.",
+    dato: "Usa las barbillas para remover la arena en busca de comida, y otros peces lo siguen para aprovechar lo que deja al descubierto.",
+    donde: "Sobre la arena cerca del arrecife en Boca Catalina y Tres Trapi.",
+    tamano: "Hasta 40 cm"
+  },
+  {
+    id: "jurel", zona: "ruta", grupo: "pez", rareza: "comun",
+    nombre: "Jurel", cientifico: "Caranx ruber", ingles: "Bar jack", papiamento: null,
+    articulo: "Caranx ruber",
+    reconocer: "Plateado, con una franja oscura en el lomo que continúa por el lóbulo inferior de la cola.",
+    dato: "A veces caza pegado a peces que remueven la arena, como rayas o salmonetes, para atrapar lo que ellos espantan.",
+    donde: "Nadando rápido por encima del arrecife de Boca Catalina, solo o en grupos.",
+    tamano: "Hasta 60 cm"
+  },
+
+  /* ---------- Mi ruta: peces poco comunes ---------- */
+  {
+    id: "pez-angel-reina", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Pez ángel reina", cientifico: "Holacanthus ciliaris", ingles: "Queen angelfish", papiamento: "Rey di chamba",
+    articulo: "Holacanthus ciliaris",
+    reconocer: "Azul y amarillo eléctrico, con la cola amarilla y una «corona» azul con puntos en la frente.",
+    dato: "La corona de la frente le da el nombre. Se alimenta casi solo de esponjas.",
+    donde: "Entre corales y esponjas de Boca Catalina, solo o en pareja.",
+    tamano: "Hasta 45 cm"
+  },
+  {
+    id: "isabelita-medioluto", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Isabelita medioluto", cientifico: "Holacanthus tricolor", ingles: "Rock beauty", papiamento: "Ladronchi grandi",
+    articulo: "Holacanthus tricolor",
+    reconocer: "La parte delantera es amarilla y la trasera negra, con la cola amarilla y los labios azules.",
+    dato: "De joven es casi todo amarillo, con una mancha negra de borde azul que va creciendo hasta cubrir la parte de atrás del cuerpo.",
+    donde: "En el arrecife de Boca Catalina, cerca de las esponjas de las que se alimenta.",
+    tamano: "Hasta 35 cm"
+  },
+  {
+    id: "pez-mariposa-rayado", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Pez mariposa rayado", cientifico: "Chaetodon striatus", ingles: "Banded butterflyfish", papiamento: "Macamba",
+    articulo: "Chaetodon striatus",
+    reconocer: "Blanco, con tres bandas negras verticales anchas, una de ellas pasando por el ojo.",
+    dato: "Suele vivir en una pareja estable que recorre el arrecife casi en sincronía.",
+    donde: "En parejas sobre el arrecife de Boca Catalina.",
+    tamano: "Hasta 16 cm"
+  },
+  {
+    id: "pargo-amarillo", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Pargo amarillo", cientifico: "Lutjanus apodus", ingles: "Schoolmaster", papiamento: "Bers",
+    articulo: "Lutjanus apodus",
+    reconocer: "Plateado con tonos amarillos, aletas amarillas y barras verticales pálidas. Tiene una línea azul debajo del ojo.",
+    dato: "De día descansa en grupos bajo salientes de roca o entre restos de naufragios; de noche sale a cazar.",
+    donde: "Bajo salientes de roca en Boca Catalina y alrededor del Antilla.",
+    tamano: "Normalmente unos 35 cm"
+  },
+  {
+    id: "pez-cofre-liso", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Pez cofre liso", cientifico: "Lactophrys triqueter", ingles: "Smooth trunkfish", papiamento: "Fototo",
+    articulo: "Lactophrys triqueter",
+    reconocer: "Negro o marrón oscuro con puntos blancos, y el cuerpo encerrado en una caja rígida y sin espinas.",
+    dato: "Sopla chorros de agua sobre la arena para destapar gusanos y pequeños animales enterrados.",
+    donde: "Sobre la arena y los corales de Boca Catalina y Tres Trapi.",
+    tamano: "Normalmente unos 20 cm"
+  },
+  {
+    id: "torito-panal", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Torito panal", cientifico: "Acanthostracion polygonius", ingles: "Honeycomb cowfish", papiamento: "Chupachupa",
+    articulo: "Acanthostracion polygonius",
+    reconocer: "Cuerpo en forma de caja con un dibujo de hexágonos, como un panal, y dos «cuernos» sobre los ojos.",
+    dato: "Puede cambiar el color y la intensidad del dibujo en segundos, de muy pálido a muy oscuro.",
+    donde: "Nadando despacio cerca del fondo en Boca Catalina.",
+    tamano: "Hasta 50 cm"
+  },
+  {
+    id: "pez-erizo", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Pez erizo", cientifico: "Diodon hystrix", ingles: "Porcupinefish", papiamento: "Djindja",
+    articulo: "Diodon hystrix",
+    reconocer: "Marrón claro con manchas oscuras, ojos grandes y el cuerpo cubierto de espinas que normalmente lleva pegadas.",
+    dato: "Si se siente amenazado, traga agua y se infla como un balón con todas las espinas paradas.",
+    donde: "Bajo salientes de roca en Boca Catalina; de día suele estar quieto.",
+    tamano: "Normalmente unos 50 cm"
+  },
+  {
+    id: "pez-ballesta-negro", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Pez ballesta negro", cientifico: "Melichthys niger", ingles: "Black durgon", papiamento: "Doro preto",
+    articulo: "Melichthys niger",
+    reconocer: "Negro o azul muy oscuro, con líneas azul claro en la base de las aletas de arriba y de abajo.",
+    dato: "Puede trabar su primera espina dorsal en posición vertical para quedarse encajado dentro de una grieta.",
+    donde: "A media agua sobre el borde del arrecife de Boca Catalina.",
+    tamano: "Hasta 50 cm"
+  },
+  {
+    id: "soldado-barra-negra", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Soldado de barra negra", cientifico: "Myripristis jacobus", ingles: "Blackbar soldierfish", papiamento: "Wowo di boyo",
+    articulo: "Myripristis jacobus",
+    reconocer: "Rojo intenso, con ojos grandes y una barra negra justo detrás de la cabeza.",
+    dato: "Es nocturno. De día se queda en grietas y cuevas, a veces nadando boca arriba bajo los techos de roca.",
+    donde: "En grietas y huecos del arrecife de Boca Catalina y en el Antilla.",
+    tamano: "Hasta 25 cm"
+  },
+  {
+    id: "barracuda", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Barracuda", cientifico: "Sphyraena barracuda", ingles: "Great barracuda", papiamento: null,
+    articulo: "Sphyraena barracuda",
+    reconocer: "Alargada y plateada, con la mandíbula inferior saliente, dientes a la vista y manchas oscuras dispersas cerca de la cola.",
+    dato: "Suele acercarse a mirar a la gente por curiosidad. Le llaman la atención los objetos brillantes, como relojes o joyas.",
+    donde: "Quieta a media agua cerca del arrecife de Boca Catalina y alrededor del Antilla.",
+    tamano: "Normalmente 60 cm a 1 m"
+  },
+  {
+    id: "morena-pintada", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Morena pintada", cientifico: "Gymnothorax moringa", ingles: "Spotted moray", papiamento: "Congla pintá",
+    articulo: "Gymnothorax moringa",
+    reconocer: "Blanca o amarillenta, cubierta de manchas marrón oscuro muy juntas.",
+    dato: "Abre y cierra la boca todo el tiempo porque así hace pasar agua por las agallas: es su forma de respirar, no una amenaza.",
+    donde: "Asomada en grietas del arrecife de Boca Catalina.",
+    tamano: "Normalmente unos 60 cm"
+  },
+  {
+    id: "pez-lagarto", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Pez lagarto", cientifico: "Synodus intermedius", ingles: "Sand diver", papiamento: "Yuana di awa",
+    articulo: "Synodus intermedius",
+    reconocer: "Cuerpo alargado y cabeza de reptil, con barras marrones sobre un fondo color arena. Se apoya en el fondo sobre sus aletas.",
+    dato: "Pasa horas inmóvil o medio enterrado en la arena y se lanza en un instante sobre los peces pequeños que pasan.",
+    donde: "Sobre la arena entre parches de coral en Tres Trapi y Boca Catalina.",
+    tamano: "Hasta 45 cm"
+  },
+  {
+    id: "pez-leon", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Pez león", cientifico: "Pterois volitans", ingles: "Red lionfish", papiamento: null,
+    articulo: "Pterois volitans",
+    reconocer: "Franjas rojas, marrones y blancas, con aletas en forma de abanico y espinas largas.",
+    dato: "Es una especie invasora en el Caribe: aquí no tiene depredadores naturales y come peces nativos. Sus espinas son venenosas.",
+    donde: "Bajo salientes de roca y en el Antilla. Aruba tiene programas para controlarlo.",
+    tamano: "Hasta 38 cm"
+  },
+
+  {
+    id: "agujon", zona: "ruta", grupo: "pez", rareza: "poco",
+    nombre: "Agujón", cientifico: "Tylosurus crocodilus", ingles: "Houndfish", papiamento: null,
+    articulo: "Tylosurus crocodilus",
+    reconocer: "Como un pez aguja, pero mucho más grande y grueso, con el lomo azul verdoso y el pico lleno de dientes.",
+    dato: "De noche lo atraen las luces y puede saltar fuera del agua a gran velocidad; hay casos de pescadores heridos por su pico.",
+    donde: "Patrullando cerca de la superficie sobre el arrecife de Boca Catalina, a veces solo.",
+    tamano: "Hasta 1,5 m"
+  },
+
+  /* ---------- Mi ruta: peces raros ---------- */
+  {
+    id: "pez-loro-arcoiris", zona: "ruta", grupo: "pez", rareza: "rara",
+    nombre: "Pez loro arcoíris", cientifico: "Scarus guacamaia", ingles: "Rainbow parrotfish", papiamento: "Gutu guacamaya / Kedebe",
+    articulo: "Scarus guacamaia",
+    reconocer: "Grande, con la cabeza y la parte delantera de color naranja bronce y el resto del cuerpo verde. El pico es verde azulado.",
+    dato: "Los juveniles crecen en los manglares, así que la especie sufre donde se pierden esos bosques.",
+    donde: "Ocasional en el arrecife poco profundo, sobre todo cerca de zonas con manglares.",
+    tamano: "Hasta 1,2 m"
+  },
+  {
+    id: "lenguado-pavo-real", zona: "ruta", grupo: "pez", rareza: "rara",
+    nombre: "Lenguado pavo real", cientifico: "Bothus lunatus", ingles: "Peacock flounder", papiamento: "Tapatapa / Sobra di Cristo",
+    articulo: "Bothus lunatus",
+    reconocer: "Plano y ovalado, con los dos ojos del mismo lado del cuerpo y anillos azules brillantes sobre un fondo color arena.",
+    dato: "Nace con un ojo a cada lado, como cualquier pez; al crecer, uno de los ojos migra al otro lado de la cabeza. Cambia de color para imitar el fondo.",
+    donde: "Camuflado sobre la arena en Tres Trapi y Boca Catalina; se nota cuando se mueve.",
+    tamano: "Hasta 45 cm"
+  },
+  {
+    id: "pez-escorpion", zona: "ruta", grupo: "pez", rareza: "rara",
+    nombre: "Pez escorpión", cientifico: "Scorpaena plumieri", ingles: "Spotted scorpionfish", papiamento: "Brandvis cora",
+    articulo: "Scorpaena plumieri",
+    reconocer: "Moteado y con colgajos de piel que lo hacen parecer una roca con algas. Al abrir las aletas muestra manchas negras con puntos blancos.",
+    dato: "Sus espinas son venenosas, y su camuflaje es tan bueno que casi siempre pasa desapercibido.",
+    donde: "Inmóvil sobre roca y coral en Boca Catalina.",
+    tamano: "Hasta 45 cm"
+  },
+
+  /* ---------- Mi ruta: tortugas ---------- */
+  {
+    id: "tortuga-verde", zona: "ruta", grupo: "tortuga", rareza: "poco",
+    nombre: "Tortuga verde", cientifico: "Chelonia mydas", ingles: "Green sea turtle", papiamento: null,
+    articulo: "Chelonia mydas",
+    reconocer: "Cabeza pequeña y redondeada, con un solo par de escamas entre los ojos. Caparazón liso, de color oliva o marrón.",
+    dato: "El nombre no viene del caparazón sino de su grasa, que se vuelve verdosa por su dieta de pastos marinos.",
+    donde: "Tres Trapi y Boca Catalina, comiendo cerca del fondo. Entre marzo y noviembre anida en playas como Eagle Beach.",
+    tamano: "Caparazón de hasta 1,2 m"
+  },
+  {
+    id: "tortuga-carey", zona: "ruta", grupo: "tortuga", rareza: "poco",
+    nombre: "Tortuga carey", cientifico: "Eretmochelys imbricata", ingles: "Hawksbill sea turtle", papiamento: null,
+    articulo: "Eretmochelys imbricata",
+    reconocer: "Pico estrecho y puntiagudo, y un caparazón de placas superpuestas como tejas, con dibujos ámbar y marrón.",
+    dato: "Se alimenta sobre todo de esponjas. Está en peligro crítico, en buena parte por la caza para fabricar objetos de carey.",
+    donde: "Sobre el arrecife de Boca Catalina y en el naufragio Antilla.",
+    tamano: "Caparazón de unos 80 cm"
+  },
+
+  /* ---------- Mi ruta: invertebrados ---------- */
+  {
+    id: "estrella-cojin", zona: "ruta", grupo: "invertebrado", rareza: "comun",
+    nombre: "Estrella de mar cojín", cientifico: "Oreaster reticulatus", ingles: "Cushion sea star", papiamento: null,
+    articulo: "Oreaster reticulatus",
+    reconocer: "Gruesa y rígida, con cinco brazos cortos. Puede ser roja, naranja o amarilla, con una red de bultos en el dorso.",
+    dato: "Para comer saca el estómago por la boca y digiere sobre la arena. Fuera del agua se asfixia, así que se mira pero no se levanta.",
+    donde: "Sobre la arena clara de Tres Trapi, casi en la orilla.",
+    tamano: "Hasta 50 cm de diámetro"
+  },
+  {
+    id: "pulpo-arrecife", zona: "ruta", grupo: "invertebrado", rareza: "poco",
+    nombre: "Pulpo de arrecife", cientifico: "Octopus briareus", ingles: "Caribbean reef octopus", papiamento: null,
+    articulo: "Octopus briareus",
+    reconocer: "Azul verdoso translúcido con manchas marrón rojizo. Cambia de color y de textura en un instante.",
+    dato: "Es nocturno, pero de día se puede encontrar su guarida por los restos de conchas y caparazones que deja en la entrada.",
+    donde: "Escondido en grietas de Boca Catalina; más activo al atardecer.",
+    tamano: "Unos 60 cm con los brazos extendidos"
+  },
+  {
+    id: "calamar-arrecife", zona: "ruta", grupo: "invertebrado", rareza: "poco",
+    nombre: "Calamar de arrecife", cientifico: "Sepioteuthis sepioidea", ingles: "Caribbean reef squid", papiamento: null,
+    articulo: "Sepioteuthis sepioidea",
+    reconocer: "Cuerpo corto con una aleta ondulante a todo lo largo. Suele ir en grupos alineados en fila.",
+    dato: "Se comunica cambiando los colores y dibujos de su piel, y puede mostrar mensajes distintos a cada lado del cuerpo.",
+    donde: "En grupos cerca de la superficie en Boca Catalina y Malmok; a veces se quedan mirando a quien hace snorkel.",
+    tamano: "Unos 20 cm"
+  },
+
+  /* ---------- Mi ruta: corales y abanicos ---------- */
+  {
+    id: "coral-cerebro", zona: "ruta", grupo: "coral", rareza: "comun",
+    nombre: "Coral cerebro", cientifico: "Pseudodiploria strigosa", ingles: "Symmetrical brain coral", papiamento: null,
+    articulo: "Pseudodiploria strigosa",
+    reconocer: "Cúpula redondeada cubierta de surcos que serpentean como los pliegues de un cerebro.",
+    dato: "Cada colonia está hecha de miles de pólipos diminutos que comparten el mismo esqueleto, y puede vivir siglos.",
+    donde: "En el arrecife poco profundo de Boca Catalina y alrededor del Antilla.",
+    tamano: "Colonias de hasta casi 2 m"
+  },
+  {
+    id: "coral-mostaza", zona: "ruta", grupo: "coral", rareza: "comun",
+    nombre: "Coral mostaza", cientifico: "Porites astreoides", ingles: "Mustard hill coral", papiamento: null,
+    articulo: "Porites astreoides",
+    reconocer: "Montículos o placas lisas de color amarillo mostaza, verdoso o marrón, cubiertos de poros diminutos.",
+    dato: "Aguanta mejor que otros corales los cambios del arrecife, así que hoy es de los más comunes del Caribe.",
+    donde: "Sobre la roca y el arrecife poco profundo de Boca Catalina y Tres Trapi.",
+    tamano: "Normalmente menos de 60 cm"
+  },
+  {
+    id: "coral-estrella", zona: "ruta", grupo: "coral", rareza: "comun",
+    nombre: "Coral estrella lobulado", cientifico: "Orbicella annularis", ingles: "Lobed star coral", papiamento: null,
+    articulo: "Orbicella annularis",
+    reconocer: "Columnas o lóbulos redondeados de color marrón o verdoso, cubiertos de pólipos pequeños en forma de estrella.",
+    dato: "Fue uno de los grandes constructores de los arrecifes del Caribe. Crece apenas un centímetro al año y hoy está amenazado.",
+    donde: "En el arrecife de Boca Catalina, sobre todo en la parte un poco más profunda.",
+    tamano: "Colonias de varios metros de ancho"
+  },
+  {
+    id: "coral-de-fuego", zona: "ruta", grupo: "coral", rareza: "comun",
+    nombre: "Coral de fuego", cientifico: "Millepora alcicornis", ingles: "Branching fire coral", papiamento: null,
+    articulo: "Millepora alcicornis",
+    reconocer: "Ramas lisas o láminas color mostaza con las puntas más claras. A veces crece como una costra sobre las gorgonias.",
+    dato: "No es un coral verdadero sino un pariente de las medusas. Tocarlo produce una quemazón que puede durar horas.",
+    donde: "Sobre rocas y arrecife poco profundo de Boca Catalina. Mejor no tocar nada.",
+    tamano: "De costras finas a ramas de unos 50 cm"
+  },
+  {
+    id: "abanico-de-mar", zona: "ruta", grupo: "coral", rareza: "comun",
+    nombre: "Abanico de mar", cientifico: "Gorgonia ventalina", ingles: "Common sea fan", papiamento: null,
+    articulo: "Gorgonia ventalina",
+    reconocer: "Abanico morado o amarillento con forma de red, que se mece con el movimiento del agua.",
+    dato: "Crece de frente a la corriente, para que el agua atraviese la red y le traiga plancton.",
+    donde: "En el arrecife de Boca Catalina y alrededor del Antilla, donde hay algo de corriente.",
+    tamano: "Hasta 1,8 m de alto"
+  },
+  {
+    id: "coral-cuerno-de-alce", zona: "ruta", grupo: "coral", rareza: "rara",
+    nombre: "Coral cuerno de alce", cientifico: "Acropora palmata", ingles: "Elkhorn coral", papiamento: null,
+    articulo: "Acropora palmata",
+    reconocer: "Ramas anchas y aplanadas como los cuernos de un alce, de color marrón dorado.",
+    dato: "Una enfermedad acabó con más del 95 % de sus colonias desde los años 70, y hoy está en peligro crítico.",
+    donde: "En zonas poco profundas con oleaje. En Aruba se cultiva y se replanta en arrecifes artificiales.",
+    tamano: "Colonias de hasta 3,5 m de ancho"
+  },
+  {
+    id: "coral-cuerno-de-ciervo", zona: "ruta", grupo: "coral", rareza: "rara",
+    nombre: "Coral cuerno de ciervo", cientifico: "Acropora cervicornis", ingles: "Staghorn coral", papiamento: null,
+    articulo: "Acropora cervicornis",
+    reconocer: "Ramas cilíndricas que se bifurcan como los cuernos de un ciervo, de color marrón claro con las puntas blancas.",
+    dato: "Crece rápido para ser un coral, varios centímetros al año, y por eso es de los favoritos de los viveros que restauran arrecifes.",
+    donde: "En parches poco profundos. En Aruba también se replanta, junto al cuerno de alce.",
+    tamano: "Ramas de hasta 2 m"
+  },
+  {
+    id: "coral-pilar", zona: "ruta", grupo: "coral", rareza: "rara",
+    nombre: "Coral pilar", cientifico: "Dendrogyra cylindrus", ingles: "Pillar coral", papiamento: null,
+    articulo: "Dendrogyra cylindrus",
+    reconocer: "Columnas verticales que salen del fondo como velas. De día tiene los pólipos extendidos, y por eso se ve peludo.",
+    dato: "Una enfermedad que apareció en 2014 lo diezmó en todo el Caribe, y hoy está en peligro crítico.",
+    donde: "Se ha visto en Catalina Cove, junto a Boca Catalina.",
+    tamano: "Columnas de hasta 3 m de alto"
+  },
+
+  /* ---------- Mi ruta: erizos ---------- */
+  {
+    id: "erizo-espinas-largas", zona: "ruta", grupo: "invertebrado", rareza: "poco",
+    nombre: "Erizo de espinas largas", cientifico: "Diadema antillarum", ingles: "Long-spined sea urchin", papiamento: null,
+    articulo: "Diadema antillarum",
+    reconocer: "Negro, con espinas larguísimas y finas que se mueven y apuntan hacia las sombras que se acercan.",
+    dato: "En 1983 una enfermedad mató a casi todos los del Caribe, y en 2022 hubo otra mortandad. Son clave para el arrecife porque se comen las algas que asfixian al coral.",
+    donde: "En grietas y entre rocas de Boca Catalina; de noche salen a comer. Sus espinas se quiebran dentro de la piel, así que cuidado al apoyarse.",
+    tamano: "Caparazón de unos 10 cm, espinas de hasta 30 cm"
+  },
+  {
+    id: "erizo-de-roca", zona: "ruta", grupo: "invertebrado", rareza: "comun",
+    nombre: "Erizo de roca", cientifico: "Echinometra lucunter", ingles: "Rock-boring urchin", papiamento: null,
+    articulo: "Echinometra lucunter",
+    reconocer: "Pequeño y ovalado, negro o rojizo, con espinas cortas y gruesas.",
+    dato: "Excava huecos en la roca con las espinas y los dientes, y vive dentro de ellos.",
+    donde: "En las rocas de la orilla, donde rompen las olas. Por eso conviene entrar al agua por la arena.",
+    tamano: "Unos 10 cm con las espinas"
+  },
+  {
+    id: "huevo-de-mar", zona: "ruta", grupo: "invertebrado", rareza: "poco",
+    nombre: "Huevo de mar", cientifico: "Tripneustes ventricosus", ingles: "West Indian sea egg", papiamento: null,
+    articulo: "Tripneustes ventricosus",
+    reconocer: "Caparazón oscuro, casi negro, cubierto de espinas cortas y blancas.",
+    dato: "Se tapa con pedazos de pasto marino y conchas, quizá para protegerse del sol.",
+    donde: "Sobre pastos marinos y fondos de arena con algas.",
+    tamano: "Hasta 15 cm de diámetro"
+  },
+
+  /* ---------- Para la próxima ---------- */
+  {
+    id: "morena-verde", zona: "proxima", grupo: "pez", rareza: "poco",
+    nombre: "Morena verde", cientifico: "Gymnothorax funebris", ingles: "Green moray", papiamento: "Congla berde",
+    articulo: "Gymnothorax funebris",
+    reconocer: "Verde uniforme, sin manchas, con el cuerpo grueso y musculoso.",
+    dato: "En realidad su piel es azul oscura: el verde lo da una capa de moco amarillo que la cubre.",
+    donde: "En aguas más profundas, como Mangel Halto, y en naufragios.",
+    tamano: "Hasta 2,5 m"
+  },
+  {
+    id: "pez-ballesta-reina", zona: "proxima", grupo: "pez", rareza: "rara",
+    nombre: "Pez ballesta reina", cientifico: "Balistes vetula", ingles: "Queen triggerfish", papiamento: "Pishiporco rabo di gai",
+    articulo: "Balistes vetula",
+    reconocer: "Azul y amarillo, con dos líneas azules en la cara y las puntas de las aletas alargadas como filamentos.",
+    dato: "Es de los pocos peces que comen erizos de mar: les sopla agua para voltearlos y atacarlos por el lado sin espinas.",
+    donde: "En el borde del arrecife y en zonas más profundas.",
+    tamano: "Hasta 60 cm"
+  },
+  {
+    id: "sabalo", zona: "proxima", grupo: "pez", rareza: "rara",
+    nombre: "Sábalo", cientifico: "Megalops atlanticus", ingles: "Atlantic tarpon", papiamento: null,
+    articulo: "Megalops atlanticus",
+    reconocer: "Plateado y enorme, con escamas grandes como monedas y la mandíbula inferior que sobresale hacia arriba.",
+    dato: "Puede tragar aire en la superficie gracias a una vejiga que funciona como pulmón, así que sobrevive en aguas con poco oxígeno.",
+    donde: "Bajo muelles iluminados de noche y en algunos naufragios.",
+    tamano: "Hasta 2,5 m"
+  },
+  {
+    id: "caballito-de-mar", zona: "proxima", grupo: "pez", rareza: "rara",
+    nombre: "Caballito de mar", cientifico: "Hippocampus erectus", ingles: "Lined seahorse", papiamento: null,
+    articulo: "Hippocampus erectus",
+    reconocer: "Cabeza de caballo, cola que se enrolla y cuerpo de anillos. Puede ser amarillo, naranja, marrón o negro, a veces con líneas blancas.",
+    dato: "El macho es el que queda embarazado: la hembra deposita los huevos en su bolsa y él los incuba hasta que nacen.",
+    donde: "Agarrado a pastos marinos, esponjas o gorgonias. Hay que buscarlo con calma y, mejor, con guía.",
+    tamano: "Hasta 19 cm"
+  },
+  {
+    id: "raya-latigo", zona: "proxima", grupo: "tiburon-raya", rareza: "poco",
+    nombre: "Raya látigo", cientifico: "Hypanus americanus", ingles: "Southern stingray", papiamento: null,
+    articulo: "Hypanus americanus",
+    reconocer: "En forma de rombo, gris o marrón por encima y blanca por debajo, con una cola larga que lleva una espina.",
+    dato: "Pasa mucho tiempo enterrada en la arena con solo los ojos afuera. Su espina es venenosa: en zonas de arena conviene caminar arrastrando los pies.",
+    donde: "Sobre fondos de arena, como en Mangel Halto.",
+    tamano: "Hasta 1,5 m de ancho"
+  },
+  {
+    id: "raya-aguila", zona: "proxima", grupo: "tiburon-raya", rareza: "rara",
+    nombre: "Raya águila", cientifico: "Aetobatus narinari", ingles: "Spotted eagle ray", papiamento: null,
+    articulo: "Aetobatus narinari",
+    reconocer: "Dorso oscuro con cientos de puntos blancos, hocico en forma de pico de pato y una cola muy larga.",
+    dato: "A veces salta fuera del agua. Usa el hocico para escarbar la arena en busca de almejas y caracoles.",
+    donde: "Planeando sobre fondos de arena; se ha visto en Baby Beach.",
+    tamano: "Hasta 3 m de ancho"
+  },
+  {
+    id: "tiburon-gata", zona: "proxima", grupo: "tiburon-raya", rareza: "rara",
+    nombre: "Tiburón gata", cientifico: "Ginglymostoma cirratum", ingles: "Nurse shark", papiamento: null,
+    articulo: "Ginglymostoma cirratum",
+    reconocer: "Marrón, con dos aletas dorsales muy atrás en el cuerpo, una cola larga y dos barbillas carnosas junto a la boca.",
+    dato: "Pasa el día quieto en el fondo, bajo salientes de roca, y caza de noche succionando a sus presas como una aspiradora.",
+    donde: "En aguas más profundas, como Mangel Halto. Es tranquilo, pero muerde si lo molestan.",
+    tamano: "Hasta 3 m"
+  },
+  {
+    id: "langosta-espinosa", zona: "proxima", grupo: "invertebrado", rareza: "poco",
+    nombre: "Langosta espinosa", cientifico: "Panulirus argus", ingles: "Caribbean spiny lobster", papiamento: null,
+    articulo: "Panulirus argus",
+    reconocer: "Marrón con manchas claras, antenas larguísimas y espinosas, y sin pinzas grandes.",
+    dato: "En otoño migra en filas de decenas de individuos, uno detrás de otro, tocándose con las antenas.",
+    donde: "En grietas profundas y en el naufragio Antilla; de día solo se le ven las antenas.",
+    tamano: "Unos 20 a 45 cm"
+  }
+];
+
+const ZONAS = ["ruta", "proxima"];
+const GRUPOS = [
+  { id: "pez", titulo: "Peces" },
+  { id: "tiburon-raya", titulo: "Tiburones y rayas" },
+  { id: "tortuga", titulo: "Tortugas" },
+  { id: "coral", titulo: "Corales y abanicos de mar" },
+  { id: "invertebrado", titulo: "Estrellas, erizos y otros invertebrados" }
+];
+const ORDEN_RAREZA = { comun: 0, poco: 1, rara: 2 };
+const RAREZAS = { comun: "Común", poco: "Poco común", rara: "Rara" };
+const CLAVE_VISTAS = "album-aruba-vistas";
+const APIS = ["https://en.wikipedia.org/w/api.php", "https://es.wikipedia.org/w/api.php"];
+const TAMANO_LOTE = 20;
+const ESTRELLA = '<path d="M50 3 L61 39 L97 50 L61 61 L50 97 L39 61 L3 50 L39 39 Z"/>';
+
+/* ---------- Guardado de las láminas vistas ---------- */
+function leerVistas() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(CLAVE_VISTAS));
+    return new Set(Array.isArray(guardado) ? guardado : []);
+  } catch (e) {
+    return new Set();
+  }
+}
+function guardarVistas() {
+  try {
+    localStorage.setItem(CLAVE_VISTAS, JSON.stringify([...vistas]));
+  } catch (e) {
+    /* Sin almacenamiento disponible: el progreso dura hasta cerrar la página. */
+  }
+}
+const vistas = leerVistas();
+
+/* ---------- Utilidades ---------- */
+function escapar(texto) {
+  return String(texto)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+function textoPlano(html) {
+  const doc = new DOMParser().parseFromString(html || "", "text/html");
+  return doc.body.textContent.replace(/\s+/g, " ").trim();
+}
+function enLotes(lista, tamano) {
+  const lotes = [];
+  for (let i = 0; i < lista.length; i += tamano) lotes.push(lista.slice(i, i + tamano));
+  return lotes;
+}
+
+/* ---------- Construcción de las láminas ---------- */
+function crearLamina(especie) {
+  const numero = especie.numero;
+  const rareza = RAREZAS[especie.rareza];
+  const papiamento = especie.papiamento
+    ? `<div><dt>Papiamento</dt><dd>${escapar(especie.papiamento)}</dd></div>`
+    : "";
+
+  const lamina = document.createElement("article");
+  lamina.className = "lamina";
+  lamina.dataset.id = especie.id;
+  lamina.dataset.rareza = especie.rareza;
+  lamina.innerHTML = `
+    <div class="lamina-giro">
+      <div class="cara frente">
+        <button class="frente-voltear" type="button">
+          <span class="foto">
+            <span class="foto-fondo"></span>
+            <img alt="" loading="lazy" decoding="async">
+            <span class="foto-estado">Cargando foto…</span>
+          </span>
+          <span class="banda">
+            <span class="numero">${numero}</span>
+            <span class="rareza">${rareza}</span>
+          </span>
+        </button>
+        <button class="marcar" type="button" aria-pressed="false" aria-label="La vi: lámina ${numero}" title="Marcar como vista">
+          <svg viewBox="0 0 100 100" aria-hidden="true">${ESTRELLA}</svg>
+        </button>
+      </div>
+      <div class="cara reverso" tabindex="-1" inert aria-hidden="true">
+        <div class="reverso-cabecera">
+          <span class="numero">${numero}</span>
+          <span class="rareza">${rareza}</span>
+        </div>
+        <h4 class="nombre">${escapar(especie.nombre)}</h4>
+        <p class="cientifico">${escapar(especie.cientifico)}</p>
+        <dl class="otros-nombres">
+          <div><dt>Inglés</dt><dd>${escapar(especie.ingles)}</dd></div>
+          ${papiamento}
+        </dl>
+        <p class="texto">${escapar(especie.reconocer)}</p>
+        <p class="texto"><strong>Dato curioso:</strong> ${escapar(especie.dato)}</p>
+        <dl class="ficha">
+          <div><dt>Dónde en Aruba</dt><dd>${escapar(especie.donde)}</dd></div>
+          <div><dt>Tamaño</dt><dd>${escapar(especie.tamano)}</dd></div>
+        </dl>
+        <div class="acciones">
+          <button class="boton-vista" type="button" aria-pressed="false">
+            <svg viewBox="0 0 100 100" aria-hidden="true">${ESTRELLA}</svg>La vi
+          </button>
+          <button class="boton-voltear" type="button">Ver la foto</button>
+        </div>
+        <p class="credito">Cargando créditos de la foto…</p>
+      </div>
+    </div>`;
+
+  const reverso = lamina.querySelector(".reverso");
+
+  lamina.querySelector(".frente-voltear").addEventListener("click", () => voltear(lamina, true));
+  lamina.querySelector(".boton-voltear").addEventListener("click", () => voltear(lamina, false));
+  reverso.addEventListener("click", (evento) => {
+    if (evento.target.closest("button, a")) return;
+    voltear(lamina, false);
+  });
+  const alternarVista = () => {
+    if (vistas.has(especie.id)) vistas.delete(especie.id);
+    else vistas.add(especie.id);
+    guardarVistas();
+    aplicarEstadoVista(lamina, especie);
+    actualizarProgreso();
+  };
+  lamina.querySelector(".boton-vista").addEventListener("click", alternarVista);
+  lamina.querySelector(".marcar").addEventListener("click", alternarVista);
+
+  aplicarEstadoVista(lamina, especie);
+  especie.elemento = lamina;
+  return lamina;
+}
+
+function voltear(lamina, haciaReverso) {
+  const frente = lamina.querySelector(".frente");
+  const reverso = lamina.querySelector(".reverso");
+  lamina.classList.toggle("volteada", haciaReverso);
+  frente.inert = haciaReverso;
+  reverso.inert = !haciaReverso;
+  frente.setAttribute("aria-hidden", String(haciaReverso));
+  reverso.setAttribute("aria-hidden", String(!haciaReverso));
+  (haciaReverso ? reverso : frente.querySelector(".frente-voltear")).focus({ preventScroll: true });
+}
+
+function aplicarEstadoVista(lamina, especie) {
+  const vista = vistas.has(especie.id);
+  lamina.classList.toggle("vista", vista);
+  lamina.querySelector(".boton-vista").setAttribute("aria-pressed", String(vista));
+  lamina.querySelector(".marcar").setAttribute("aria-pressed", String(vista));
+  lamina.querySelector(".marcar").title = vista ? "Quitar la marca" : "Marcar como vista";
+  lamina.querySelector(".frente-voltear").setAttribute(
+    "aria-label",
+    `Lámina ${especie.numero}${vista ? ", vista" : ""}. Ver qué especie es.`
+  );
+}
+
+function actualizarProgreso() {
+  const total = ESPECIES.length;
+  const cuenta = ESPECIES.filter((e) => vistas.has(e.id)).length;
+  document.getElementById("progreso-texto").textContent = `Vistas: ${cuenta} de ${total}`;
+  document.getElementById("progreso-relleno").style.width = `${total ? (cuenta / total) * 100 : 0}%`;
+}
+
+function construirAlbum() {
+  let contador = 0;
+  for (const zona of ZONAS) {
+    const contenedor = document.querySelector(`[data-zona="${zona}"]`);
+    for (const grupo of GRUPOS) {
+      const especies = ESPECIES
+        .map((e, i) => ({ e, i }))
+        .filter(({ e }) => e.zona === zona && e.grupo === grupo.id)
+        .sort((a, b) => (ORDEN_RAREZA[a.e.rareza] - ORDEN_RAREZA[b.e.rareza]) || (a.i - b.i))
+        .map(({ e }) => e);
+      if (!especies.length) continue;
+
+      const bloque = document.createElement("div");
+      bloque.className = "grupo";
+      const idTitulo = `grupo-${zona}-${grupo.id}`;
+      bloque.setAttribute("role", "group");
+      bloque.setAttribute("aria-labelledby", idTitulo);
+      bloque.innerHTML = `
+        <div class="grupo-cabecera">
+          <h3 class="grupo-titulo" id="${idTitulo}">${grupo.titulo}</h3>
+          <span class="grupo-cuenta">${especies.length} ${especies.length === 1 ? "especie" : "especies"}</span>
+        </div>
+        <div class="rejilla"></div>`;
+      const rejilla = bloque.querySelector(".rejilla");
+      for (const especie of especies) {
+        contador += 1;
+        especie.numero = "N.º " + String(contador).padStart(2, "0");
+        rejilla.appendChild(crearLamina(especie));
+      }
+      contenedor.appendChild(bloque);
+    }
+  }
+}
+
+/* ---------- Fotos desde Wikimedia Commons ---------- */
+async function consultar(api, parametros) {
+  const url = api + "?" + new URLSearchParams({
+    action: "query",
+    format: "json",
+    formatversion: "2",
+    origin: "*",
+    ...parametros
+  });
+  const respuesta = await fetch(url);
+  if (!respuesta.ok) throw new Error("Wikipedia respondió " + respuesta.status);
+  const datos = await respuesta.json();
+  return datos.query || {};
+}
+
+function resolverPagina(titulo, consulta) {
+  const normalizados = Object.fromEntries((consulta.normalized || []).map((x) => [x.from, x.to]));
+  const redirecciones = Object.fromEntries((consulta.redirects || []).map((x) => [x.from, x.to]));
+  let resultado = normalizados[titulo] || titulo;
+  resultado = redirecciones[resultado] || resultado;
+  return (consulta.pages || []).find((pagina) => pagina.title === resultado);
+}
+
+function mostrarSinFoto(especie, mensaje) {
+  const lamina = especie.elemento;
+  if (!lamina || lamina.classList.contains("foto-lista")) return;
+  lamina.querySelector(".foto-estado").textContent = mensaje;
+  lamina.querySelector(".credito").textContent = "Foto no disponible.";
+}
+
+function pintarFoto(especie, info) {
+  const lamina = especie.elemento;
+  const src = info.thumburl || info.url;
+  const img = lamina.querySelector(".foto img");
+  img.onload = () => {
+    lamina.querySelector(".foto-fondo").style.backgroundImage = `url("${src}")`;
+    lamina.classList.add("foto-lista");
+  };
+  img.onerror = () => mostrarSinFoto(especie, "No se pudo cargar la foto. Revisa tu conexión a internet y recarga la página.");
+  img.src = src;
+  especie.conFoto = true;
+
+  const meta = info.extmetadata || {};
+  const autor = textoPlano(meta.Artist && meta.Artist.value) || "Autor sin identificar";
+  const licencia = textoPlano(meta.LicenseShortName && meta.LicenseShortName.value);
+  const credito = lamina.querySelector(".credito");
+  credito.textContent = `Foto: ${autor}${licencia ? ", " + licencia : ""}, vía `;
+  const enlace = document.createElement("a");
+  enlace.href = info.descriptionurl || "https://commons.wikimedia.org/";
+  enlace.target = "_blank";
+  enlace.rel = "noopener";
+  enlace.textContent = "Wikimedia Commons";
+  credito.append(enlace, ".");
+}
+
+/* Busca la foto principal del artículo de cada especie (primero en inglés, luego en español). */
+async function buscarArchivos(especies) {
+  let pendientes = especies.filter((e) => !e.archivo);
+  for (const api of APIS) {
+    if (!pendientes.length) break;
+    for (const lote of enLotes(pendientes, TAMANO_LOTE)) {
+      const consulta = await consultar(api, {
+        redirects: "1",
+        prop: "pageimages",
+        piprop: "name",
+        pilimit: "50",
+        titles: lote.map((e) => e.articulo).join("|")
+      });
+      for (const especie of lote) {
+        const pagina = resolverPagina(especie.articulo, consulta);
+        if (pagina && pagina.pageimage) especie.archivo = pagina.pageimage;
+      }
+    }
+    pendientes = pendientes.filter((e) => !e.archivo);
+  }
+}
+
+/* Pide la miniatura, el autor y la licencia de cada archivo. */
+async function buscarInformacion(especies) {
+  const consultarLote = async (lote) => {
+    const consulta = await consultar(APIS[0], {
+      prop: "imageinfo",
+      iiprop: "url|extmetadata",
+      iiurlwidth: "500",
+      iiextmetadatafilter: "Artist|LicenseShortName",
+      titles: lote.map((e) => "File:" + e.archivo).join("|")
+    });
+    for (const especie of lote) {
+      const pagina = resolverPagina("File:" + especie.archivo, consulta);
+      const info = pagina && pagina.imageinfo && pagina.imageinfo[0];
+      if (info) pintarFoto(especie, info);
+    }
+  };
+  for (const lote of enLotes(especies, TAMANO_LOTE)) await consultarLote(lote);
+  /* Segundo intento, de una en una, para las que quedaron sin respuesta. */
+  for (const especie of especies.filter((e) => !e.conFoto)) await consultarLote([especie]);
+}
+
+async function cargarFotos() {
+  try {
+    await buscarArchivos(ESPECIES);
+    await buscarInformacion(ESPECIES.filter((e) => e.archivo));
+    ESPECIES.filter((e) => !e.conFoto).forEach((e) =>
+      mostrarSinFoto(e, "Wikipedia no tiene una foto libre para esta especie.")
+    );
+  } catch (error) {
+    ESPECIES.filter((e) => !e.conFoto).forEach((e) =>
+      mostrarSinFoto(e, "No se pudo cargar la foto. Revisa tu conexión a internet y recarga la página.")
+    );
+  }
+}
+
+/* ---------- Inicio ---------- */
+construirAlbum();
+actualizarProgreso();
+cargarFotos();
+</script>
+</body>
+</html>
